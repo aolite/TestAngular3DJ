@@ -8,7 +8,7 @@
  * Controller of the yeomanGeneratedProjectApp
  */
 angular.module('chartModule')
-  .controller('DonutCtrl', ['$scope','$http', '$interval', function ($scope, $http, $interval){
+  .controller('DonutCtrl', ['$scope', function ($scope){
 
     /*d3.json('resources/donut-data.json', function(err, data){
      if(err)
@@ -20,7 +20,7 @@ angular.module('chartModule')
      $scope.$apply();
      });*/
 
-    $interval(function(){
+    /*$interval(function(){
       $http.get('resources/donut-data.json').success(function(response){
         console.log(response);
         var data = response.map(function(d){ return d * Math.random() });
@@ -29,5 +29,11 @@ angular.module('chartModule')
       }).error(function(err){
         throw err;
       });
-    }, 1000);
+    }, 1000);*/
+
+    $scope.$on ('dataService-received-data-event', function (evt, data){
+      $scope.data = data.data;
+    });
+
+
   }]);

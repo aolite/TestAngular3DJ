@@ -7,7 +7,7 @@
  * # donutChart
  */
 angular.module('chartModule')
-  .directive('donutChart', function () {
+  .directive('donutChart', ['dataService',function (dataService) {
     return {
       scope:{
         data:'='
@@ -18,7 +18,7 @@ angular.module('chartModule')
       link: function postLink(scope, element, attrs) {
 
         var color = d3.scale.category10();
-        var data = scope.data; //[10, 20, 30];
+        var data = [10,20,30,40];//scope.data; //[10, 20, 30];
         var width = 300;
         var height = 300;
         var min = Math.min(width, height);
@@ -42,7 +42,6 @@ angular.module('chartModule')
 
         scope.$watch('data', function (data){
           if(!data){ return; }
-          console.log('new Data: '+data);
           arcs = arcs.data(pie(data));
           arcs.exit().remove();
           arcs.enter().append('path')
@@ -55,4 +54,4 @@ angular.module('chartModule')
 
       }
     };
-  });
+  }]);
