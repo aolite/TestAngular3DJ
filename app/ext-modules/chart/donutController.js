@@ -9,6 +9,7 @@
  */
 angular.module('chartModule')
   .controller('DonutCtrl', ['$scope','$http', '$interval', function ($scope, $http, $interval){
+
     /*d3.json('resources/donut-data.json', function(err, data){
      if(err)
      {

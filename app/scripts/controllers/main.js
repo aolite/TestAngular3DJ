@@ -8,6 +8,6 @@
  * Controller of the yeomanGeneratedProjectApp
  */
 angular.module('app')
-  .controller('MainCtrl', ['$scope','$http', '$interval', function ($scope, $http, $interval) {
+  .controller('MainCtrl', [function () {
 
   }]);
