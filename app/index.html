@@ -1,0 +1,82 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Test Angular + D3.js</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width">
+    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+    <!-- build:css(.) styles/vendor.css -->
+    <!-- bower:css -->
+    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+    <!-- endbower -->
+    <!-- endbuild -->
+    <!-- build:css(.tmp) styles/main.css -->
+    <link rel="stylesheet" href="styles/main.css">
+    <!-- endbuild -->
+  </head>
+  <body ng-app="app">
+    <!--[if lte IE 8]>
+      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+    <![endif]-->
+
+    <!-- Add your site or application content here -->
+    <h1>Test D3.js with angular</h1>
+
+    <h2>Donut Chart</h2>
+
+    <div ng-controller="MainCtrl">
+      <donut-chart data="data"></donut-chart>
+    </div>
+
+    <!--<div ng-init="valueRange=[{value:10},{value:20},{value:30}]">
+      <button ng-click="valueRange.push({value: 10})">Add Slice</button>
+      <button ng-click="valueRange.pop()"> Remove Slice</button>
+
+      <br>
+      <input type="range" ng-model="slice.value" ng-repeat="slice in valueRange track by $index"/>
+
+      <br>
+      <donut-chart data="valueRange" style="float:right"></donut-chart>
+    </div>-->
+
+    <!--<div ng-init="charts=[[8,3,7],[2,5,9],[6,2,3]]">
+      <donut-chart data="chart" ng-repeat="chart in charts"></donut-chart>
+    </div>-->
+
+
+    <!-- Google Analytics: change UA-XXXXX-X to be your site's ID -->
+     <script>
+       !function(A,n,g,u,l,a,r){A.GoogleAnalyticsObject=l,A[l]=A[l]||function(){
+       (A[l].q=A[l].q||[]).push(arguments)},A[l].l=+new Date,a=n.createElement(g),
+       r=n.getElementsByTagName(g)[0],a.src=u,r.parentNode.insertBefore(a,r)
+       }(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+       ga('create', 'UA-XXXXX-X');
+       ga('send', 'pageview');
+    </script>
+
+    <!-- build:js(.) scripts/vendor.js -->
+    <!-- bower:js -->
+    <script src="bower_components/jquery/dist/jquery.js"></script>
+    <script src="bower_components/angular/angular.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.js"></script>
+    <script src="bower_components/angular-animate/angular-animate.js"></script>
+    <script src="bower_components/d3/d3.js"></script>
+    <!-- endbower -->
+    <!-- endbuild -->
+
+        <script src="ext-modules/chart/chartModule.js"></script>
+
+        <!-- build:js({.tmp,app}) scripts/scripts.js -->
+        <script src="scripts/app.js"></script>
+        <script src="scripts/controllers/main.js"></script>
+        <script src="ext-modules/chart/donutchartDirective.js"></script>
+        <script src="scripts/controllers/hellocontroller.js"></script>
+        <script src="scripts/directives/progressbar.js"></script>
+        <script src="ext-modules/chart/donutController.js"></script>
+        <!-- endbuild -->
+
+
+</body>
+</html>
