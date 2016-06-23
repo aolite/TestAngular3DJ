@@ -29,6 +29,22 @@
       <donut-chart data="data"></donut-chart>
     </div>
 
+    <h2>Circular Heat Chart</h2>
+
+    <div>
+      <div id="div1">
+        <circular-heat-chart data="55" name="Personal" diameter="150" metric="personalPercentage"></circular-heat-chart>
+      </div>
+
+      <div id="div2">
+        <circular-heat-chart data="55" name="Neighbourhood" diameter="150" metric="neighbourpercentage"></circular-heat-chart>
+      </div>
+
+      <div id="div3">
+        <circular-heat-chart data="55" name="Community" diameter="150" metric="communityPercentage"></circular-heat-chart>
+      </div>
+    </div>
+
     <!--<div ng-init="valueRange=[{value:10},{value:20},{value:30}]">
       <button ng-click="valueRange.push({value: 10})">Add Slice</button>
       <button ng-click="valueRange.pop()"> Remove Slice</button>
@@ -76,6 +92,8 @@
         <script src="scripts/controllers/hellocontroller.js"></script>
         <script src="ext-modules/chart/donutController.js"></script>
 
+        <script src="ext-modules/chart/circularheatchartDirective.js"></script>
+        <script src="ext-modules/chart/circularheatchartController.js"></script>
         <!-- endbuild -->
 
 
