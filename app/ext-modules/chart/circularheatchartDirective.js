@@ -22,7 +22,9 @@ angular.module('chartModule')
 
         scope.$watch('data', function (data){
 
-          if(!data){ return; }
+          if(!data){
+            return;
+          }
 
           radialProgress(element[0])
             .label(scope.name)

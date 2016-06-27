@@ -22,7 +22,7 @@ angular.module('chartModule')
         var width = 300;
         var height = 300;
         var min = Math.min(width, height);
-        var svg = d3.select(element[0]).append('svg')
+        var svg = d3.select(element[0]).append('svg');
         var pie = d3.layout.pie().sort(null);
 
 
