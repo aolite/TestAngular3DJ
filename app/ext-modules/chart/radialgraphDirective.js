@@ -12,6 +12,57 @@ angular.module('app')
       template: '',
       restrict: 'E',
       link: function postLink(scope, element, attrs) {
+
+
+        var energyCategories = {
+          'light':{
+            'category': "Consumption"
+          },
+
+          'electricity':{
+            'category': "Consumption"
+          },
+
+          'pv':{
+            'category': "Saving"
+          }
+        };
+        var energyConsumptionData = {
+
+          'light':{
+            'dayAverage': 1000,
+            'percentageDay': [],
+            'objective':[]
+          },
+
+          'electricity':{
+            'dayAverage': 1000,
+            'percentageDay': [],
+            'objective':[]
+          },
+
+          'pv':{
+            'dayAverage': 1000,
+            'percentageDay': [],
+            'objective':[]
+          },
+
+          'tv':{
+            'dayAverage': 1000,
+            'percentageDay': [],
+            'objective':[]
+          },
+
+          'objective':[]
+
+        };
+
+        var jsonData = randomEnergyData ()
+        console.log(jsonData [0])
+        energyConsumptionData= parseJSONData(jsonData,energyConsumptionData);
+
+        console.log (energyConsumptionData);
+
         element.text('this is the radialGraph directive');
 
         //Create the graph place
@@ -24,7 +75,8 @@ angular.module('app')
         var hourRadix = radix + 12;
         var totalHours = 24;
         var rotationHours=0;
-        var Radix2Bar= (radix *.75)*2
+        var Radix2Bar= (radix *.75)*2;
+        var isoDateFormat = d3.time.format.utc("%Y-%m-%dT%H:%M:%S.%LZ");
 
         var min = Math.min(canvasWidth, canvasHeight);
         var svg = d3.select(element[0]).append('svg')
@@ -60,7 +112,7 @@ angular.module('app')
           .domain([0, 24 * 60])
           .range([0, 360]);
 
-        var gRads = svg.append('g').attr('id','rads');
+
         var gDashedCircle = svg.append('g').attr('id','consumption');
 
         gDashedCircle.append('circle')
@@ -72,6 +124,7 @@ angular.module('app')
           .attr('stroke-dasharray', 3)
           .attr('stroke-width', 2)
           .attr('stroke-opacity', 0);
+
 
         var gConsumption = svg.append('g').attr('id','dottedConsumption');
 
@@ -125,94 +178,130 @@ angular.module('app')
             .style('fill', '#666')
         }
 
-        //Print the lateral bar...
+        // Print the consumption values for each of the hours.
 
-        var desglose = svg.append('g')
-          .attr('id', 'desglose_grupo')
-          .attr('transform', 'translate(' + (centerX + radix + 100) + ',' + (centerY - (radix * .75)) + ')')
-          .attr('opacity', 0);
+        var gConsumptionValues = svg.append('g').attr('id', 'consumptionBars');
 
-        desglose.append('rect')
-          .attr('y', Radix2Bar + 20)
-          .attr('width', 165)
-          .attr('height', 3)
-          .attr('fill', '#3C3C3C');
+        //Draw the mouse as a circle
+        var groupCircle = svg.append('g').attr('id','consumption'),
+            consumoCircle = groupCircle.append ('circle')
+              .attr('r', radix)
+              .attr('cx', centerX)
+              .attr('cy', centerY)
+              .attr('stroke', '#990000')
+              .attr('fill', 'none')
+              .attr('stroke-dasharray', 3)
+              .attr('stroke-width', 2)
+              .attr('stroke-opacity', 0);
 
-        var fechaBloque = desglose.append('text')
-          .text("hoy")
-          .attr('y', Radix2Bar + 39)
-          .attr('text-anchor', 'start')
-          .style('font-size', '14')
-          .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
-          .attr('fill', '#666');
-
-        var  horaBloque = desglose.append('text')
-          .text("21:00h")
-          .attr('y', Radix2Bar + 62)
-          .attr('text-anchor', 'start')
-          .style('font-size', '27')
-          .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
-          .attr('fill', '#666');
-
-        var desgloseBloqueRenovable = desglose.append('g');
-
-        var altoRenovables = desgloseBloqueRenovable.append('rect')
-          .attr('x', -8)
-          .attr('width', 2)
-          .attr('height', 200)
-          .attr('fill', '#669C83');
-
-        var textoRenovables = desgloseBloqueRenovable.append('text')
-          .text("--")
-          .attr('text-anchor', 'middle')
-          .style('font-size', '13')
-          .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
-          .attr('fill', '#669C83')
-          .attr('x', -100)
-          .attr('y', -12)
-          .attr('transform', 'rotate(-90)');
+        var consumptionGroup = svg.append('g').attr('id', 'consumo-dot'),
+            consumoDot = consumptionGroup.append('circle')
+              .attr('r', 5)
+              .attr('cx', -9999)
+              .attr('cy', -9999)
+              .attr('stroke', 'none')
+              .attr('fill', '#900');
 
 
-        //
+        var grupoHoras = d3.select("svg #horas")
+          .attr('transform', 'translate(' + centerX + ',' + centerY + ')');
 
-        var tooltipWidth = 120;
-        var tooltipHeight = 28;
-        var currentTooltipFormat;
-        var tooltip = svg.append('g').attr('id', 'dem-tooltip').attr('opacity', 0);
-        var tooltip_shadow = tooltip.append('rect')
-          .attr({
-            'width': tooltipWidth + 4,
-            'height': tooltipHeight + 4,
-            'fill': 'black',
-            'fill-opacity': .15
-          });
+        //introduce the data values and convert it into bars...
 
-        var tooltip_rect = tooltip.append('rect')
-          .attr({
-            'width': tooltipWidth,
-            'height': tooltipHeight
-          });
+        /*consumptionGroup.enter().append('g')
+          .attr('class','consumption'),
+          .attr('id',function (d){
 
-        var tooltip_fecha = tooltip.append('text')
-          .attr('id', 'fecha')
-          .attr('x', 5)
-          .attr('y', 11)
-          .attr('text-anchor', 'start')
-          .style('font-size', '11')
-          .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
-          .style('fill', 'black')
-          .style('fill-opacity', .75);
+        })*/
 
-        var tooltip_mw = tooltip.append('text')
-          .text('')
-          .attr('x', 15)
-          .attr('y', 24)
-          .style('font-size', '13')
-          .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
-          .style('fill', 'white');
+        /*var gConsumptionBars = svg.select('#consumptionBars').selectAll('.consumptionValues')
+              .data(energyConsumptionData, function (d){
+                return d.ts;
+              })*/
+
+
 
       }
     };
+
+    // Function that returns the data filled with random values. Just for testing purposes.
+
+    function randomEnergyData (){
+      //{"light":4087,"electricity":5075,"tv":2441, "pv":100, "objective":1200, "timeStamp":"2016-09-16T08:30:00.000Z"}
+
+      var todayDate = new Date ();
+
+      var jsonData = [
+        /*{
+          "light": 0,
+          "electricity": 0,
+          "tv": 0,
+          "pv":0,
+          "timeStamp": todayDate.toISOString()
+        }*/
+      ];
+
+      var obj = {};
+
+      for (var i=0; i< 24*6; i++){
+        obj.light= Math.random()*100;
+        obj.electricity= Math.random()*100;
+        obj.tv= Math.random()*100;
+        obj.pv= Math.random()*100;
+        obj.objective= Math.random()*100;
+
+        obj.timeStamp= todayDate.toISOString();
+
+        jsonData.push(obj);
+        obj={};
+        todayDate =  new Date(todayDate.getTime() - (10*60*1000))
+      }
+
+      return jsonData;
+    }
+
+    // This function permit to format JSON incoming information into the desirable variables for D3.js
+    function parseJSONData (jsonData,energyConsumptionData ){
+
+      /*
+
+       var energyConsumptionData = {
+
+       'light':{
+       'dayAverage': 1000,
+       'percentageDay': [],
+       },
+
+       'electricity':{
+       'dayAverage': 1000,
+       'percentageDay': [],
+
+       },
+
+       'tv':{
+       'dayAverage': 1000,
+       'percentageDay': [],
+       },
+
+       'pv':{
+       'dayAverage': 1000,
+       'percentageDay': [],
+       }
+
+       'objective':[]
+       };
+       */
+      for (var elem in jsonData){
+        energyConsumptionData.light.percentageDay.push(jsonData[elem].light);
+        energyConsumptionData.electricity.percentageDay.push(jsonData[elem].electricity);
+        energyConsumptionData.tv.percentageDay.push(jsonData[elem].tv);
+        energyConsumptionData.pv.percentageDay.push(jsonData[elem].pv);
+        energyConsumptionData.objective.push(jsonData[elem].objective);
+      }
+
+      console.log(energyConsumptionData);
+      return energyConsumptionData;
+    }
 
     function grades2Rad (grades){
       return (Math.PI/180)*grades;
@@ -223,10 +312,6 @@ angular.module('app')
       var med = (measure)? measure: 100;
 
       return (data*med)/mx;
-    }
-
-    function printLateralBar (){
-
     }
 
 
