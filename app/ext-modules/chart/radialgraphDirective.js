@@ -184,7 +184,7 @@ angular.module('app')
 
         //Draw the mouse as a circle
         var groupCircle = svg.append('g').attr('id','consumption'),
-            consumoCircle = groupCircle.append ('circle')
+            consumptionCircle = groupCircle.append ('circle')
               .attr('r', radix)
               .attr('cx', centerX)
               .attr('cy', centerY)
@@ -208,18 +208,22 @@ angular.module('app')
 
         //introduce the data values and convert it into bars...
 
-        /*consumptionGroup.enter().append('g')
-          .attr('class','consumption'),
-          .attr('id',function (d){
+        var consumptionBars = svg.select('#consumptionBars').selectAll('.rad')
+          .data(jsonData, function (d){
+            return d.timeStamp;
+          });
 
-        })*/
+        consumptionBars.enter().append('g')
+          .attr ('class','rad')
+          .attr ('id', function (d){
+            var tStamp = isoDateFormat.parse(d.timeStamp);
+            return ['id-' , tStamp.getHours() , ':' , tStamp.getMinutes() , '-dia-' , tStamp.getDate()].join("");
+          });
 
-        /*var gConsumptionBars = svg.select('#consumptionBars').selectAll('.consumptionValues')
-              .data(energyConsumptionData, function (d){
-                return d.ts;
-              })*/
+        consumptionBars.each(function(d,i){
+          var paths = d3.select(this).selectAll('path');
 
-
+        });
 
       }
     };
