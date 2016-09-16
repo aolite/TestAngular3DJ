@@ -38,6 +38,9 @@
     "node": ">=0.10.0"
   },
   "scripts": {
-    "test": "karma start test\\karma.conf.js"
+    "install":"npm install && npm install grunt-cli && bower install",
+    "test": "karma start test\\karma.conf.js",
+    "bower": "bower install",
+    "start": "grunt serve"
   }
 }
