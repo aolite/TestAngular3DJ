@@ -323,58 +323,14 @@ angular.module('app')
                 return '#' + idsInfoTable[that.datum()].color;
               });
 
-            group.selectAll('path');
-
-            //define a variable that aggregattes all the energy consumption values
-            var consumptionAgg = [d.light, d.electricity, d.tv, d.pv];
-            var demandEnergy = normaliseConsumption (consumptionAgg);
-
-            console.log("demandEnergy", demandEnergy);
-            var gConsumptionBar,
-              n=0,
-              accInner = 0;
-
-            var arc = d3.svg.arc(),
-              tsDate = isoDateFormat.parse(d.timeStamp),
-              h = tsDate.getHours(),
-              m = tsDate.getMinutes(),
-              angle = rotHour((h * 60) + m),
-              path;
-
-            paths.each (function (){
-
-
-              gConsumptionBar = (demandEnergy[n]/100) * scaleRadix (d.demand);
-
-              console.log ("trace gConsumption bar", gConsumptionBar,n);
-
-              d3.select(this).attr ('d', arc.startAngle(function (){
-                return grad2rad(angle);})
-                .endAngle (function (){
-                  return grad2rad (angle + arcPart)
-                }).outerRadius (function (){
-                  return gConsumptionBar + accInner
-                }).innerRadius (function (){
-                  return accInner;
-                }));
-
-              accInner += gConsumptionBar;
-
-              n++;
-
-
-            });
-
-
-            n++;
           }).attr('opacity', 0.4)
             .attr('transform', 'translate(' + centerX + ',' + centerY + ')');
 
-        /*consumptionBars.each(function(d){
+        consumptionBars.each(function(d){
           var paths = d3.select(this).selectAll('path');
 
           //define a variable that aggregattes all the energy consumption values
-          var consumptionAgg = [d.light, d.electricity, d.tv, d.pv];
+          var consumptionAgg = [d.light, d.electricity, d.tv, d.pv, d.objective];
           var demandEnergy = normaliseConsumption (consumptionAgg);
 
           console.log("demandEnergy", demandEnergy);
@@ -386,15 +342,13 @@ angular.module('app')
             tsDate = isoDateFormat.parse(d.timeStamp),
             h = tsDate.getHours(),
             m = tsDate.getMinutes(),
-            angle = rotHour((h * 60) + m),
-            path;
+            angle = rotHour((h * 60) + m);
 
           paths.each (function (){
 
 
             gConsumptionBar = (demandEnergy[n]/100) * scaleRadix (d.demand);
 
-            console.log ("trace gConsumption bar", gConsumptionBar,n);
 
             d3.select(this).attr ('d', arc.startAngle(function (){
               return grad2rad(angle);})
@@ -412,7 +366,7 @@ angular.module('app')
 
 
           });
-        });*/
+        });
 
 
       }
