@@ -327,7 +327,7 @@ angular.module('app')
                 return '#' + idsInfoTable[that.datum()].color;
               });
 
-          }).attr('opacity', 0.4)
+          }).attr('opacity', 0)
             .attr('transform', 'translate(' + centerX + ',' + centerY + ')');
 
         consumptionBars.each(function(d){
