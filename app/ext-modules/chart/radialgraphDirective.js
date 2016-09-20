@@ -124,6 +124,8 @@ angular.module('app')
         var Radix2Bar= (radix *.75)*2;
         var isoDateFormat = d3.time.format.utc("%Y-%m-%dT%H:%M:%S.%LZ");
         var scaleRadix = d3.scale.linear().range([0, radix]);
+        var opacityScale = d3.scale.linear()
+          .range([.4, 1]);
 
         var rotHour = d3.scale.linear()
           .domain([0, 24 * 60])
@@ -132,6 +134,8 @@ angular.module('app')
         var min = Math.min(canvasWidth, canvasHeight);
         var svg = d3.select(element[0]).append('svg')
           .attr({width: canvasWidth, height: canvasHeight});
+
+        opacityScale.domain([0, jsonData.length]);
 
 
 
@@ -364,9 +368,16 @@ angular.module('app')
 
             n++;
 
-
           });
         });
+
+        consumptionBars.transition().duration(500).delay(function(d, i) {
+          return (jsonData.length - i) * 25
+        })
+          .attr('opacity', function(d, i) {
+            return opacityScale(i);
+          })
+          .attr('transform', 'translate(' + centerX + ',' + centerY + ')');
 
 
       }
