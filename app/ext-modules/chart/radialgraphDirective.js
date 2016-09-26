@@ -182,20 +182,102 @@ angular.module('app')
 
           console.log ("demandEnergy=",demandEnergy);
           console.log("ecoPercent= ", ecoPercent);
-          desglose.attr('opacity', 1);
+          verticalDetail.attr('opacity', 1);
 
-          textoRenovables.text("renovables " + US.numberFormat(",.2f")(ecoPercent)+ "% ")
+          renevableText.text("renovables " + US.numberFormat(",.2f")(ecoPercent)+ "% ")
             .transition()
             .attr('x', -(scaleRadix / 100 * ecoPercent) / 2);
 
-          fechaBloque
+          blockDate
             .text(US.timeFormat("%A %d")(tsDate));
 
-          horaBloque
+          hourBlock
             .text(US.timeFormat("%H:%M")(tsDate) + "h");
 
 
+          var detailScale = d3.scale.linear()
+              .range([0, Radix2Bar]);
 
+          var dataTable =[];
+          var totalDemand = data.demand
+
+          for (i = 0; i < orderedIdsTable.length; i++) {
+            dataTable[i] = {
+              id: orderedIdsTable[i],
+              datos: data[orderedIdsTable[i]]
+            };
+          }
+
+          console.log ('ifTable: ', dataTable);
+          console.log ('orderedTable', orderedIdsTable);
+
+
+          var blocks = verticalDetail.selectAll('.j-bloque')
+            .data(dataTable, function(d, i) {
+              return d.id;
+            });
+
+          blocks.enter()
+            .append('g')
+            .attr('id', function(d, i) {
+              return "des_" + d.id;
+            })
+            .attr('class', 'j-bloque')
+            .each(function(d) {
+
+              var that = d3.select(this);
+
+              console.log ('d',d);
+              that.append('rect')
+                .attr('width', 6)
+                .attr('height', d.datos*100/totalDemand)
+                .attr('fill', function(d) {
+                  return '#' + idsInfoTable[d.id].color;
+                });
+
+              that.append('text')
+                .text(function(d) {
+                  return idsInfoTable[d.id].id;
+                })
+                .attr('class', 'j-nombre')
+                .attr('x', 30)
+                .attr('y', 20)
+                .attr('text-anchor', 'start')
+                .style('font-size', '13')
+                .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
+                .style('fill', '#B3B3B3')
+                .style('fill', function(d) {
+                  return '#' + idsInfoTable[d.id].highlightColor;
+                })
+                .attr('transform', 'rotate(-45)');
+
+              that.append('text')
+                .text(function(d) {
+                  return idsInfoTable[d.id].id;
+                })
+                .attr('class', 'j-MW')
+                .attr('x', 30)
+                .attr('y', 32)
+                .attr('text-anchor', 'start')
+                .style('font-size', '12')
+                .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
+                .style('fill', '#B3B3B3')
+                .style('fill', function(d) {
+                  return '#' + idsInfoTable[d.id].highlightColor;
+                })
+                .attr('transform', 'rotate(-45)');
+
+              that.append('path')
+                .style('fill', 'none')
+                .style('stroke-width', '1')
+                .style('stroke', function(d) {
+                  return '#' + idsInfoTable[d.id].color;
+                })
+
+
+            }).attr('transform', function(d, i) {
+                  return 'translate(0,' + (50 * i) + ')'
+                })
         }
 
 
@@ -299,38 +381,39 @@ angular.module('app')
 
         // Print the lateral information regarding the clicked bar
 
-        var desglose = svg.append('g')
+        var verticalDetail = svg.append('g')
           .attr('id', 'desglose_grupo')
           .attr('transform', 'translate(' + (centerX + radix + 100) + ',' + (centerY - (radix * .75)) + ')')
           .attr('opacity', 0);
 
-        desglose.append('rect')
+        verticalDetail.append('rect')
           .attr('y', Radix2Bar + 20)
           .attr('width', 165)
           .attr('height', 3)
           .attr('fill', '#3C3C3C');
 
-        var fechaBloque = desglose.append('text')
+        var blockDate = verticalDetail.append('text')
             .text("hoy")
             .attr('y', Radix2Bar + 39)
             .attr('text-anchor', 'start')
             .style('font-size', '14')
             .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
             .attr('fill', '#666'),
-          horaBloque = desglose.append('text')
+          hourBlock = verticalDetail.append('text')
             .text("21:00h")
             .attr('y', Radix2Bar + 62)
             .attr('text-anchor', 'start')
             .style('font-size', '27')
             .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
             .attr('fill', '#666'),
-          desgloseBloqueRenovable = desglose.append('g'),
-          altoRenovables = desgloseBloqueRenovable.append('rect')
+          renevableBlockDetail = verticalDetail.append('g'),
+          altoRenovables = renevableBlockDetail.append('rect')
             .attr('x', -8)
             .attr('width', 2)
             .attr('height', 200)
             .attr('fill', '#669C83'),
-          textoRenovables = desgloseBloqueRenovable.append('text')
+
+          renevableText = renevableBlockDetail.append('text')
             .text("--")
             .attr('text-anchor', 'middle')
             .style('font-size', '13')
