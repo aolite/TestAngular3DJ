@@ -70,7 +70,7 @@ angular.module('app')
               'highlightColor': '96C6DD',
               'icon': '\\e806'
             }
-          }
+          };
 
         var energyConsumptionData = {
 
@@ -110,6 +110,7 @@ angular.module('app')
 
         element.text('this is the radialGraph directive');
 
+
         //Create the graph place
 
         var arcPart = (360 / jsonData.length) / 1.05;
@@ -137,7 +138,68 @@ angular.module('app')
 
         opacityScale.domain([0, jsonData.length]);
 
+        var en_US= {
+          "decimal": ".",
+          "thousands": ",",
+          "grouping": [3],
+          "currency": ["$", ""],
+          "dateTime": "%a %b %e %X %Y",
+          "date": "%m/%d/%Y",
+          "time": "%H:%M:%S",
+          "periods": ["AM", "PM"],
+          "days": ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+          "shortDays": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+          "months": ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
+          "shortMonths": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+        };
 
+        var US = d3.locale(en_US);
+
+
+
+
+        /****************/
+
+        function printVerticalBar (evt, data){
+          console.log("Print vertical bar", data);
+          //var keys = getJsonKeys(data);
+
+          var consumptionAgg = [data.light, data.electricity, data.tv, data.pv, data.objective];
+          var demandEnergy = normaliseConsumption (consumptionAgg);
+          var hourDemand = data.demand;
+
+
+
+          var accInner = 0,
+            thickConsumption = 0,
+            ln = demandEnergy.length,
+            tsDate = isoDateFormat.parse(data.timeStamp),
+            h = tsDate.getHours(),
+            m = tsDate.getMinutes(),
+            ecoPercent = data.pv*100/data.demand,
+            path,
+            i;
+
+          console.log ("demandEnergy=",demandEnergy);
+          console.log("ecoPercent= ", ecoPercent);
+          desglose.attr('opacity', 1);
+
+          textoRenovables.text("renovables " + US.numberFormat(",.2f")(ecoPercent)+ "% ")
+            .transition()
+            .attr('x', -(scaleRadix / 100 * ecoPercent) / 2);
+
+          fechaBloque
+            .text(US.timeFormat("%A %d")(tsDate));
+
+          horaBloque
+            .text(US.timeFormat("%H:%M")(tsDate) + "h");
+
+
+
+        }
+
+
+        /****************/
 
         //Create a rectangle for place the graph
         svg.append('rect')
@@ -235,6 +297,49 @@ angular.module('app')
             .style('fill', '#666')
         }
 
+        // Print the lateral information regarding the clicked bar
+
+        var desglose = svg.append('g')
+          .attr('id', 'desglose_grupo')
+          .attr('transform', 'translate(' + (centerX + radix + 100) + ',' + (centerY - (radix * .75)) + ')')
+          .attr('opacity', 0);
+
+        desglose.append('rect')
+          .attr('y', Radix2Bar + 20)
+          .attr('width', 165)
+          .attr('height', 3)
+          .attr('fill', '#3C3C3C');
+
+        var fechaBloque = desglose.append('text')
+            .text("hoy")
+            .attr('y', Radix2Bar + 39)
+            .attr('text-anchor', 'start')
+            .style('font-size', '14')
+            .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
+            .attr('fill', '#666'),
+          horaBloque = desglose.append('text')
+            .text("21:00h")
+            .attr('y', Radix2Bar + 62)
+            .attr('text-anchor', 'start')
+            .style('font-size', '27')
+            .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
+            .attr('fill', '#666'),
+          desgloseBloqueRenovable = desglose.append('g'),
+          altoRenovables = desgloseBloqueRenovable.append('rect')
+            .attr('x', -8)
+            .attr('width', 2)
+            .attr('height', 200)
+            .attr('fill', '#669C83'),
+          textoRenovables = desgloseBloqueRenovable.append('text')
+            .text("--")
+            .attr('text-anchor', 'middle')
+            .style('font-size', '13')
+            .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
+            .attr('fill', '#669C83')
+            .attr('x', -100)
+            .attr('y', -12)
+            .attr('transform', 'rotate(-90)');
+
         // Print the consumption values for each of the hours.
 
         /*
@@ -259,30 +364,10 @@ angular.module('app')
 
 
         var maxData = d3.max(jsonData, function (d){return d.demand});
-        console.log (maxData);
+
         scaleRadix.domain ([0, maxData]);
 
         var gConsumptionValues = svg.append('g').attr('id', 'consumptionBars');
-
-        //Draw the mouse as a circle
-        var groupCircle = svg.append('g').attr('id','consumption'),
-            consumptionCircle = groupCircle.append ('circle')
-              .attr('r', radix)
-              .attr('cx', centerX)
-              .attr('cy', centerY)
-              .attr('stroke', '#990000')
-              .attr('fill', 'none')
-              .attr('stroke-dasharray', 3)
-              .attr('stroke-width', 2)
-              .attr('stroke-opacity', 0);
-
-        var consumptionGroup = svg.append('g').attr('id', 'consumo-dot'),
-            consumoDot = consumptionGroup.append('circle')
-              .attr('r', 5)
-              .attr('cx', -9999)
-              .attr('cy', -9999)
-              .attr('stroke', 'none')
-              .attr('fill', '#900');
 
 
         var grupoHoras = d3.select("svg #horas")
@@ -310,7 +395,9 @@ angular.module('app')
               .enter().append('path')
               .on('click', function() {
                 var that = d3.select(this);
-                console.log("click", isoDateFormat.parse(d.timeStamp), that.datum(), d[that.datum()])
+                console.log("click", isoDateFormat.parse(d.timeStamp), that.datum(), d[that.datum()]);
+
+                printVerticalBar("",d);
               })
               .on('mouseover', function() {
                 var that = d3.select(this);
@@ -337,7 +424,7 @@ angular.module('app')
           var consumptionAgg = [d.light, d.electricity, d.tv, d.pv, d.objective];
           var demandEnergy = normaliseConsumption (consumptionAgg);
 
-          console.log("demandEnergy", demandEnergy);
+          //console.log("demandEnergy", demandEnergy);
           var gConsumptionBar,
             n=0,
             accInner = 0;
@@ -379,9 +466,13 @@ angular.module('app')
           })
           .attr('transform', 'translate(' + centerX + ',' + centerY + ')');
 
-
       }
+
+
+
     };
+
+
 
     // Function that returns the data filled with random values. Just for testing purposes.
 
@@ -477,6 +568,16 @@ angular.module('app')
       return dataNormalization;
 
     }
+
+    function getJsonKeys (data){
+      var keys = [];
+      for(var k in data) keys.push(k);
+
+      console.log("total " + keys.length + " keys: " + keys);
+
+      return keys;
+    }
+
 
     function grades2Rad (grades){
       return (Math.PI/180)*grades;
