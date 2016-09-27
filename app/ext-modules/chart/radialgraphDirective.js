@@ -36,7 +36,7 @@ angular.module('app')
               'nombreAbrev': 'light',
               'color': '7EAADD',
               'highlightColor': 'c6d1dd',
-              'icon': '\\e82b',
+              'icon': '\\e82b'
             },
             'electricity': {
               'id': 'hid',
@@ -155,9 +155,6 @@ angular.module('app')
 
         var US = d3.locale(en_US);
 
-
-
-
         /****************/
 
         function printVerticalBar (evt, data){
@@ -166,27 +163,26 @@ angular.module('app')
 
           var consumptionAgg = [data.light, data.electricity, data.tv, data.pv, data.objective];
           var demandEnergy = normaliseConsumption (consumptionAgg);
-          var hourDemand = data.demand;
 
 
 
           var accInner = 0,
             thickConsumption = 0,
-            ln = demandEnergy.length,
             tsDate = isoDateFormat.parse(data.timeStamp),
             h = tsDate.getHours(),
-            m = tsDate.getMinutes(),
             ecoPercent = data.pv*100/data.demand,
             path,
             i;
 
-          console.log ("demandEnergy=",demandEnergy);
           console.log("ecoPercent= ", ecoPercent);
           verticalDetail.attr('opacity', 1);
 
+          renevableHigh.transition()
+            .attr("height",ecoPercent/100 * Radix2Bar);
+
           renevableText.text("renovables " + US.numberFormat(",.2f")(ecoPercent)+ "% ")
             .transition()
-            .attr('x', -(scaleRadix / 100 * ecoPercent) / 2);
+            .attr('x', -(ecoPercent/100 * Radix2Bar)/2); //scaleRadix / 100 * ecoPercent) / 2
 
           blockDate
             .text(US.timeFormat("%A %d")(tsDate));
@@ -194,12 +190,8 @@ angular.module('app')
           hourBlock
             .text(US.timeFormat("%H:%M")(tsDate) + "h");
 
-
-          var detailScale = d3.scale.linear()
-              .range([0, Radix2Bar]);
-
           var dataTable =[];
-          var totalDemand = data.demand
+
 
           for (i = 0; i < orderedIdsTable.length; i++) {
             dataTable[i] = {
@@ -207,9 +199,6 @@ angular.module('app')
               datos: data[orderedIdsTable[i]]
             };
           }
-
-          console.log ('ifTable: ', dataTable);
-          console.log ('orderedTable', orderedIdsTable);
 
 
           var blocks = verticalDetail.selectAll('.j-bloque')
@@ -227,10 +216,9 @@ angular.module('app')
 
               var that = d3.select(this);
 
-              console.log ('d',d);
               that.append('rect')
                 .attr('width', 6)
-                .attr('height', d.datos*100/totalDemand)
+                .attr('height', 10)
                 .attr('fill', function(d) {
                   return '#' + idsInfoTable[d.id].color;
                 });
@@ -272,12 +260,63 @@ angular.module('app')
                 .style('stroke-width', '1')
                 .style('stroke', function(d) {
                   return '#' + idsInfoTable[d.id].color;
-                })
+                });
 
 
             }).attr('transform', function(d, i) {
                   return 'translate(0,' + (50 * i) + ')'
-                })
+                });
+
+
+          var colision =0;
+          var minPercentStep =8;
+          var safeStepCalc=0;
+          var safeStep=33;
+
+          blocks.each (function (d,i){
+
+            if (demandEnergy[i-1]< minPercentStep){
+              colision++;
+            }
+
+            safeStepCalc=safeStep + colision;
+            thickConsumption= (demandEnergy[i]/100)* Radix2Bar;
+
+            var that = d3.select(this)
+              .transition()
+              .attr('transform', 'translate(0,' + accInner + ')')
+              .each(function() {
+                var that = d3.select(this);
+                that.select('rect')
+                  .transition()
+                  .attr('height', thickConsumption);
+
+
+                that.select('.j-nombre')
+                  .text(function(d) {
+                    console.log(d," i: ",d.id);
+                    return idsInfoTable[d.id].nombreAbrev + " ";
+                  })
+                  .transition()
+                  .attr('transform', 'translate(' + safeStepCalc + ',' + 0 + ') ' + 'rotate(-45 0 0) ');
+
+                that.select('.j-MW')
+                  .text(function(d) {
+                    return US.numberFormat(",.2f")(demandEnergy[i]) + "% " + US.numberFormat(",.2f")(d.datos) + "MW ";
+                  })
+                  .transition()
+                  .attr('transform', 'translate(' + safeStepCalc + ',' + 0 + ') ' + 'rotate(-45 0 0) ');
+
+                that.select('path')
+                  .transition()
+                  .attr('d', 'M6,1 H' + Math.floor(31 + safeStepCalc) + " l3,-3")
+
+              });
+
+
+            accInner += thickConsumption;
+
+          });
         }
 
 
@@ -407,7 +446,7 @@ angular.module('app')
             .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
             .attr('fill', '#666'),
           renevableBlockDetail = verticalDetail.append('g'),
-          altoRenovables = renevableBlockDetail.append('rect')
+          renevableHigh = renevableBlockDetail.append('rect')
             .attr('x', -8)
             .attr('width', 2)
             .attr('height', 200)
@@ -550,7 +589,6 @@ angular.module('app')
           .attr('transform', 'translate(' + centerX + ',' + centerY + ')');
 
       }
-
 
 
     };
