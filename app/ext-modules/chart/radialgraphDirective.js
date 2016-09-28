@@ -191,7 +191,7 @@ angular.module('app')
 
             var blocks = verticalDetail.selectAll('.j-bloque')
               .data(dataTable, function(d) {
-                return d.id;
+                return d.id ;
               });
 
             blocks.enter()
