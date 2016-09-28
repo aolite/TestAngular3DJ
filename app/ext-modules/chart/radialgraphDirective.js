@@ -9,12 +9,16 @@
 angular.module('app')
   .directive('radialGraph', function () {
     return {
+      scope:{
+        idsInfoTable:'=?',
+        energyData:'='
+      },
       template: '',
       restrict: 'E',
       link: function postLink(scope, element, attrs) {
 
-        var orderedIdsTable = ['electricity', 'light', 'objective', 'pv', 'tv'],
-          idsInfoTable = {
+        if (!scope.idsInfoTable){
+          scope.idsInfoTable = {
             'light': {
               'id': 'light',
               'name': 'light',
@@ -25,7 +29,7 @@ angular.module('app')
               'category': 'consumption'
             },
             'electricity': {
-              'id': 'hid',
+              'id': 'elec',
               'name': 'electricity',
               'shortName': 'electricity',
               'color': '33537A',
@@ -34,7 +38,7 @@ angular.module('app')
               'category': 'consumption'
             },
             'tv': {
-              'id': 'sol',
+              'id': 'tv',
               'name': 'tv',
               'shortName': 'tv',
               'color': 'F5A623',
@@ -60,6 +64,7 @@ angular.module('app')
               'icon': '\\e806'
             }
           };
+        }
 
         var energyConsumptionData = {
 
@@ -91,7 +96,8 @@ angular.module('app')
 
         };
 
-        var jsonData = randomEnergyData ();
+        var jsonKeys = getJsonKeys(energyConsumptionData);
+        var jsonData = randomEnergyData (); //TODO: This has to be removed once the event is created.
         console.log(jsonData [0]);
         energyConsumptionData= parseJSONData(jsonData,energyConsumptionData);
 
@@ -147,7 +153,7 @@ angular.module('app')
         /****************/
 
         function printVerticalBar (data){
-          console.log("Print vertical bar", data);
+
           //var keys = getJsonKeys(data);
 
           var consumptionAgg = [data.light, data.electricity, data.tv, data.pv, data.objective];
@@ -181,14 +187,12 @@ angular.module('app')
 
           var dataTable =[];
 
-
-          for (i = 0; i < orderedIdsTable.length; i++) {
+          for (i = 0; i < jsonKeys.length; i++) {
             dataTable[i] = {
-              id: orderedIdsTable[i],
-              datos: data[orderedIdsTable[i]]
+              id: jsonKeys [i],
+              datos: data[jsonKeys [i]]
             };
           }
-
 
           var blocks = verticalDetail.selectAll('.j-bloque')
             .data(dataTable, function(d) {
@@ -209,12 +213,12 @@ angular.module('app')
                 .attr('width', 6)
                 .attr('height', 10)
                 .attr('fill', function(d) {
-                  return '#' + idsInfoTable[d.id].color;
+                  return '#' + scope.idsInfoTable[d.id].color;
                 });
 
               that.append('text')
                 .text(function(d) {
-                  return idsInfoTable[d.id].id;
+                  return scope.idsInfoTable[d.id].id;
                 })
                 .attr('class', 'j-nombre')
                 .attr('x', 30)
@@ -224,13 +228,13 @@ angular.module('app')
                 .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
                 .style('fill', '#B3B3B3')
                 .style('fill', function(d) {
-                  return '#' + idsInfoTable[d.id].highlightColor;
+                  return '#' + scope.idsInfoTable[d.id].highlightColor;
                 })
                 .attr('transform', 'rotate(-45)');
 
               that.append('text')
                 .text(function(d) {
-                  return idsInfoTable[d.id].id;
+                  return scope.idsInfoTable[d.id].id;
                 })
                 .attr('class', 'j-MW')
                 .attr('x', 30)
@@ -240,7 +244,7 @@ angular.module('app')
                 .style('font-family', 'Roboto Slab, Helvetica Neue, Helvetica, sans-serif')
                 .style('fill', '#B3B3B3')
                 .style('fill', function(d) {
-                  return '#' + idsInfoTable[d.id].highlightColor;
+                  return '#' + scope.idsInfoTable[d.id].highlightColor;
                 })
                 .attr('transform', 'rotate(-45)');
 
@@ -248,7 +252,7 @@ angular.module('app')
                 .style('fill', 'none')
                 .style('stroke-width', '1')
                 .style('stroke', function(d) {
-                  return '#' + idsInfoTable[d.id].color;
+                  return '#' + scope.idsInfoTable[d.id].color;
                 });
 
 
@@ -284,7 +288,7 @@ angular.module('app')
                 that.select('.j-nombre')
                   .text(function(d) {
                     console.log(d," i: ",d.id);
-                    return idsInfoTable[d.id].shortName + " ";
+                    return scope.idsInfoTable[d.id].shortName + " ";
                   })
                   .transition()
                   .attr('transform', 'translate(' + safeStepCalc + ',' + 0 + ') ' + 'rotate(-45 0 0) ');
@@ -502,7 +506,7 @@ angular.module('app')
 
 
             group.selectAll('path')
-              .data(orderedIdsTable)
+              .data(jsonKeys)
               .enter().append('path')
               .on('click', function() {
                 var that = d3.select(this);
@@ -513,16 +517,16 @@ angular.module('app')
               .on('mouseover', function() {
                 var that = d3.select(this);
                 that
-                  .attr('fill', '#' + idsInfoTable[that.datum()].highlightColor);
+                  .attr('fill', '#' + scope.idsInfoTable[that.datum()].highlightColor);
               })
               .on('mouseout', function() {
                 var that = d3.select(this);
                 that
-                  .attr('fill', '#' + idsInfoTable[that.datum()].color);
+                  .attr('fill', '#' + scope.idsInfoTable[that.datum()].color);
               })
               .attr('fill', function() {
                 var that = d3.select(this);
-                return '#' + idsInfoTable[that.datum()].color;
+                return '#' + scope.idsInfoTable[that.datum()].color;
               });
 
           }).attr('opacity', 0)
