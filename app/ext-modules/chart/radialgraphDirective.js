@@ -13,59 +13,48 @@ angular.module('app')
       restrict: 'E',
       link: function postLink(scope, element, attrs) {
 
-
-        var energyCategories = {
-          'light':{
-            'category': "Consumption"
-          },
-
-          'electricity':{
-            'category': "Consumption"
-          },
-
-          'pv':{
-            'category': "Saving"
-          }
-        };
-
         var orderedIdsTable = ['electricity', 'light', 'objective', 'pv', 'tv'],
           idsInfoTable = {
             'light': {
               'id': 'light',
-              'nombre': 'light',
-              'nombreAbrev': 'light',
+              'name': 'light',
+              'shortName': 'light',
               'color': '7EAADD',
               'highlightColor': 'c6d1dd',
-              'icon': '\\e82b'
+              'icon': '\\e82b',
+              'category': 'consumption'
             },
             'electricity': {
               'id': 'hid',
-              'nombre': 'electricity',
-              'nombreAbrev': 'electricity',
+              'name': 'electricity',
+              'shortName': 'electricity',
               'color': '33537A',
               'highlightColor': '446fa4',
-              'icon': '\\e82d'
+              'icon': '\\e82d',
+              'category': 'consumption'
             },
             'tv': {
               'id': 'sol',
-              'nombre': 'tv',
-              'nombreAbrev': 'tv',
+              'name': 'tv',
+              'shortName': 'tv',
               'color': 'F5A623',
               'highlightColor': 'f5cc89',
-              'icon': '\\e82c'
+              'icon': '\\e82c',
+              'category': 'consumption'
             },
             'pv': {
               'id': 'pv',
-              'nombre': 'pv',
-              'nombreAbrev': 'pv',
+              'name': 'pv',
+              'shortName': 'pv',
               'color': '9B9B9B',
               'highlightColor': 'bdbdbd',
-              'icon': '\\e800'
+              'icon': '\\e800',
+              'category': 'consumption'
             },
             'objective': {
               'id': 'objective',
-              'nombre': 'objective',
-              'nombreAbrev': 'objective',
+              'name': 'objective',
+              'shortName': 'objective',
               'color': '6F93A4',
               'highlightColor': '96C6DD',
               'icon': '\\e806'
@@ -102,8 +91,8 @@ angular.module('app')
 
         };
 
-        var jsonData = randomEnergyData ()
-        console.log(jsonData [0])
+        var jsonData = randomEnergyData ();
+        console.log(jsonData [0]);
         energyConsumptionData= parseJSONData(jsonData,energyConsumptionData);
 
         console.log (energyConsumptionData);
@@ -132,7 +121,7 @@ angular.module('app')
           .domain([0, 24 * 60])
           .range([0, 360]);
 
-        var min = Math.min(canvasWidth, canvasHeight);
+
         var svg = d3.select(element[0]).append('svg')
           .attr({width: canvasWidth, height: canvasHeight});
 
@@ -157,7 +146,7 @@ angular.module('app')
 
         /****************/
 
-        function printVerticalBar (evt, data){
+        function printVerticalBar (data){
           console.log("Print vertical bar", data);
           //var keys = getJsonKeys(data);
 
@@ -202,17 +191,17 @@ angular.module('app')
 
 
           var blocks = verticalDetail.selectAll('.j-bloque')
-            .data(dataTable, function(d, i) {
+            .data(dataTable, function(d) {
               return d.id;
             });
 
           blocks.enter()
             .append('g')
-            .attr('id', function(d, i) {
+            .attr('id', function(d) {
               return "des_" + d.id;
             })
             .attr('class', 'j-bloque')
-            .each(function(d) {
+            .each(function() {
 
               var that = d3.select(this);
 
@@ -282,7 +271,7 @@ angular.module('app')
             safeStepCalc=safeStep + colision;
             thickConsumption= (demandEnergy[i]/100)* Radix2Bar;
 
-            var that = d3.select(this)
+            d3.select(this)
               .transition()
               .attr('transform', 'translate(0,' + accInner + ')')
               .each(function() {
@@ -295,7 +284,7 @@ angular.module('app')
                 that.select('.j-nombre')
                   .text(function(d) {
                     console.log(d," i: ",d.id);
-                    return idsInfoTable[d.id].nombreAbrev + " ";
+                    return idsInfoTable[d.id].shortName + " ";
                   })
                   .transition()
                   .attr('transform', 'translate(' + safeStepCalc + ',' + 0 + ') ' + 'rotate(-45 0 0) ');
@@ -390,7 +379,7 @@ angular.module('app')
           .attr('fill', '#BCD5D5');
 
         //Make a transition to create a parpadeness for the clock
-        var clockTimer = setInterval(function() {
+        setInterval(function() {
 
           var date = new Date(),
             currentHourRotation = hoursRotation((60 * date.getHours()) + date.getMinutes()),
@@ -489,10 +478,10 @@ angular.module('app')
 
         scaleRadix.domain ([0, maxData]);
 
-        var gConsumptionValues = svg.append('g').attr('id', 'consumptionBars');
+        svg.append('g').attr('id', 'consumptionBars');
 
 
-        var grupoHoras = d3.select("svg #horas")
+        d3.select("svg #horas")
           .attr('transform', 'translate(' + centerX + ',' + centerY + ')');
 
         //introduce the data values and convert it into bars...
@@ -519,7 +508,7 @@ angular.module('app')
                 var that = d3.select(this);
                 console.log("click", isoDateFormat.parse(d.timeStamp), that.datum(), d[that.datum()]);
 
-                printVerticalBar("",d);
+                printVerticalBar(d);
               })
               .on('mouseover', function() {
                 var that = d3.select(this);
@@ -531,7 +520,7 @@ angular.module('app')
                 that
                   .attr('fill', '#' + idsInfoTable[that.datum()].color);
               })
-              .attr('fill', function(d, n) {
+              .attr('fill', function() {
                 var that = d3.select(this);
                 return '#' + idsInfoTable[that.datum()].color;
               });
@@ -704,16 +693,9 @@ angular.module('app')
       return (Math.PI/180)*grades;
     }
 
-    function rd3 (max, data, measure){
-      var mx =+ max;
-      var med = (measure)? measure: 100;
-
-      return (data*med)/mx;
-    }
 
     function grad2rad (grad){
       return Math.PI / 180 * grad;
     }
-
 
   });
