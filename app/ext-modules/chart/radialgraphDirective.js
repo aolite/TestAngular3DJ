@@ -62,7 +62,8 @@ angular.module('app')
               'shortName': 'objective',
               'color': '6F93A4',
               'highlightColor': '96C6DD',
-              'icon': '\\e806'
+              'icon': '\\e806',
+              'category': 'consumption'
             }
           };
         }
@@ -71,6 +72,7 @@ angular.module('app')
 
         var jsonData=[];
         var trans_mode = true;
+
         scope.$watch('energyData', function (energyData){
           console.log ("received Data", energyData);
           jsonData= energyData;
@@ -81,6 +83,20 @@ angular.module('app')
 
         });
 
+        function selectRepresentativeVariables (idsInfoTable, jsonDataSpecificValue){
+
+          var result = [];
+
+          for (var elem in idsInfoTable) {
+
+            if (!idsInfoTable[elem].category.localeCompare('consumption')){
+              result.push(jsonDataSpecificValue[elem]);
+            }
+          }
+
+          return result;
+
+        }
 
         /****** Function graphGenerator *****/
 
@@ -564,6 +580,7 @@ angular.module('app')
             return trans_mode;
           }
 
+
           function updateClockBars (){
 
             var consumptionBars = svg.select('#consumptionBars').selectAll('.rad');
@@ -572,7 +589,8 @@ angular.module('app')
               var paths = d3.select(this).selectAll('path');
 
               //define a variable that aggregattes all the energy consumption values
-              var consumptionAgg = [d.light, d.electricity, d.tv, d.pv, d.objective];
+              var consumptionAgg =selectRepresentativeVariables (scope.idsInfoTable, d);
+              //var consumptionAgg = [d.light, d.electricity, d.tv, d.pv, d.objective];
 
               var demandEnergy = normaliseConsumption (consumptionAgg);
 
