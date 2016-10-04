@@ -35,6 +35,22 @@ angular.module('dataServiceFAKE',[])
 
       };
 
+      var broadcastEnergyData = function (jsonData){
+
+        /* Data format for the json
+          {
+            "light": 0,
+            "electricity": 0,
+            "tv": 0,
+            "pv":0,
+            "demand":0,
+            "objective":0,
+            "timeStamp": todayDate.toISOString()
+          }
+         */
+        $rootScope.$broadcast('dataService-received-energyData-event',jsonData);
+      };
+
       setInterval(function(){
 
         $http.get('resources/donut-data.json').success(function(response){
@@ -65,8 +81,48 @@ angular.module('dataServiceFAKE',[])
         });
       }, 5000);
 
+      setInterval(function(){
 
+        $http.get('resources/donut-data.json').success(function(response){
 
+          response=0;
+
+          //manipulation of the service response...
+          var obj = {};
+          var todayDate = new Date ();
+
+          var jsonData = [
+            /*{
+             "light": 0,
+             "electricity": 0,
+             "tv": 0,
+             "pv":0,
+             "demand:0"
+             "timeStamp": todayDate.toISOString()
+             }*/
+          ];
+
+          for (var i=0; i< 24*6; i++){
+            obj.light= Math.random()*2000;
+            obj.electricity= Math.random()*2000;
+            obj.tv= Math.random()*300;
+            obj.pv= Math.random()*1000;
+            obj.objective= Math.random()*100;
+            obj.demand= obj.light+obj.electricity+obj.tv;
+
+            obj.timeStamp= todayDate.toISOString();
+
+            jsonData.push(obj);
+            obj={};
+            todayDate =  new Date(todayDate.getTime() - (10*60*1000));
+          }
+
+          broadcastEnergyData(jsonData);
+
+        }).error(function(err){
+          throw err;
+        });
+      }, 10000);
 
 
     // Public API here
