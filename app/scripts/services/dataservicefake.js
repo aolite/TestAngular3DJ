@@ -107,7 +107,7 @@ angular.module('dataServiceFAKE',[])
             obj.electricity= Math.random()*2000;
             obj.tv= Math.random()*300;
             obj.pv= Math.random()*1000;
-            obj.demand= obj.light+obj.electricity+obj.tv+obj.pv;
+            obj.demand= obj.light+obj.electricity+obj.tv;
             obj.objective= Math.random()*100;
 
             obj.timeStamp= todayDate.toISOString();
