@@ -70,16 +70,22 @@ angular.module('app')
 
 
         var jsonData=[];
+        var trans_mode = true;
         scope.$watch('energyData', function (energyData){
           console.log ("received Data", energyData);
           jsonData= energyData;
-          //TODO: It is required to call an updateGraphData function
-          graphGenerator (jsonData);
+
+          if (jsonData){
+            trans_mode= graphGenerator (jsonData,trans_mode);
+          }
+
         });
+
 
         /****** Function graphGenerator *****/
 
-        function graphGenerator (jsonData){
+
+        function graphGenerator (jsonData, trans_mode){
 
 
           if (!jsonData) return;
@@ -455,7 +461,8 @@ angular.module('app')
 
           }
 
-          function printClockBars(){
+
+          function printClockBars(trans_mode){
             // Print the consumption values for each of the hours.
 
             /*
@@ -532,11 +539,41 @@ angular.module('app')
               }).attr('opacity', 0)
               .attr('transform', 'translate(' + centerX + ',' + centerY + ')');
 
+
+            updateClockBars ();
+
+            if (trans_mode){
+
+              trans_mode = false;
+              consumptionBars.transition().duration(500).delay(function(d, i) {
+                return (jsonData.length - i) * 25
+              })
+                .attr('opacity', function(d, i) {
+                  return opacityScale(i);
+                })
+                .attr('transform', 'translate(' + centerX + ',' + centerY + ')');
+
+            }else {
+              console.log("Entro por el false");
+              consumptionBars.attr('opacity', function(d, i) {
+                return opacityScale(i);
+              })
+                .attr('transform', 'translate(' + centerX + ',' + centerY + ')');
+            }
+
+            return trans_mode;
+          }
+
+          function updateClockBars (){
+
+            var consumptionBars = svg.select('#consumptionBars').selectAll('.rad');
+
             consumptionBars.each(function(d){
               var paths = d3.select(this).selectAll('path');
 
               //define a variable that aggregattes all the energy consumption values
               var consumptionAgg = [d.light, d.electricity, d.tv, d.pv, d.objective];
+
               var demandEnergy = normaliseConsumption (consumptionAgg);
 
               //console.log("demandEnergy", demandEnergy);
@@ -573,18 +610,13 @@ angular.module('app')
               });
             });
 
-            consumptionBars.transition().duration(500).delay(function(d, i) {
-              return (jsonData.length - i) * 25
-            })
-              .attr('opacity', function(d, i) {
-                return opacityScale(i);
-              })
-              .attr('transform', 'translate(' + centerX + ',' + centerY + ')');
           }
 
           printGraphBase();
           initVerticalBar ();
-          printClockBars ();
+          trans_mode =printClockBars (trans_mode);
+
+          return trans_mode;
 
         }
 
