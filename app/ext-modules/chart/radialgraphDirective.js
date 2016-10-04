@@ -45,7 +45,7 @@ angular.module('app')
               'color': 'F5A623',
               'highlightColor': 'f5cc89',
               'icon': '\\e82c',
-              'category': 'consumption'
+              'category': 'production'
             },
             'pv': {
               'id': 'pv',
@@ -76,7 +76,7 @@ angular.module('app')
         myGraph.init(element);
 
         scope.$watch('energyData', function (energyData){
-          console.log ("received Data", energyData);
+          //console.log ("received Data", energyData);
           jsonData= energyData;
 
 
@@ -136,8 +136,6 @@ angular.module('app')
         energyConsumptionData.objective.push(jsonData[elem].objective);*/
       }
 
-      console.log(energyConsumptionData);
-
       return energyConsumptionData;
     }
 
@@ -160,7 +158,7 @@ angular.module('app')
 
       for(var k in data[0]) keys.push(k);
 
-      console.log("total " + keys.length + " keys: " + keys);
+      //console.log("total " + keys.length + " keys: " + keys);
 
       return keys;
     }
@@ -249,6 +247,26 @@ angular.module('app')
         this.drawVerticalBarStructure();
       }
 
+      function removeProductionVariables(jsonKeysData, idsInfoTable) {
+
+        var result =[];
+
+        for (var elem in jsonKeysData){
+          if (typeof idsInfoTable[jsonKeysData[elem]]!= "undefined"){
+            if (typeof idsInfoTable[jsonKeysData[elem]].category != "undefined"){
+              if (!idsInfoTable[jsonKeysData[elem]].category.localeCompare("consumption")){
+                result.push(jsonKeysData[elem]);
+              }
+            }else{
+              result.push(jsonKeysData[elem]);
+            }
+          }
+        }
+
+        return result;
+
+      }
+
       function updateGraphWithValues (jsonData){
 
         if (!jsonData) return;
@@ -260,7 +278,10 @@ angular.module('app')
         var jsonKeys = getJsonKeys(jsonData);
 
         var jsonKeysData = jsonKeys.slice();
-        jsonKeysData.splice(jsonKeys.length-3,jsonKeys.length-1);
+
+        jsonKeysData.splice(jsonKeys.length-2,jsonKeys.length-1);
+
+        jsonKeysData = removeProductionVariables (jsonKeysData, this.idsInfoTable);
 
         this.opacityScale.domain([0, jsonData.length]);
         var arcPart = (360 / jsonData.length) / 1.05;
@@ -455,7 +476,6 @@ angular.module('app')
           .attr('transform', 'translate(' + this.centerX + ',' + this.centerY + ')');
 
         //introduce the data values and convert it into bars...
-        //TODO: check variables modification.
 
         var consumptionBars = this.svg.select('#consumptionBars').selectAll('.rad')
           .data(jsonData, function (d){
@@ -472,13 +492,12 @@ angular.module('app')
           .each (function (d){
             var group = d3.select(this);
 
-
             group.selectAll('path')
               .data(jsonKeysData)
               .enter().append('path')
               .on('click', function() {
                 var that = d3.select(this);
-                console.log("click", dataModel.isoDateFormat.parse(d.timeStamp), that.datum(), d[that.datum()]);
+               // console.log("click", dataModel.isoDateFormat.parse(d.timeStamp), that.datum(), d[that.datum()]);
 
                 dataModel.printVerticalBars(d,jsonKeysData,jsonKeys);
               })
@@ -585,7 +604,6 @@ angular.module('app')
             result.push(jsonDataSpecificValue[elem]);
           }
         }
-
         return result;
 
       }
@@ -596,6 +614,7 @@ angular.module('app')
 
         var dataModel = this;
         var consumptionAgg =selectRepresentativeVariables (this.idsInfoTable, data);
+
         //var consumptionAgg = [data.light, data.electricity, data.tv, data.pv, data.objective];
         var demandEnergy = normaliseConsumption (consumptionAgg);
 
@@ -614,7 +633,7 @@ angular.module('app')
           path,
           i;
 
-        console.log("ecoPercent= ", ecoPercent);
+        //console.log("ecoPercent= ", ecoPercent);
         verticalDetail.attr('opacity', 1);
 
         renevableHigh.transition()
@@ -632,8 +651,9 @@ angular.module('app')
 
         var dataTable =[];
 
+
         for (i = 0; i < jsonKeysData.length; i++) {
-          console.log ()
+
           if (!dataModel.idsInfoTable[jsonKeys [i]].category.localeCompare('consumption')){
             dataTable[i] = {
               id: jsonKeys [i],
@@ -642,6 +662,8 @@ angular.module('app')
           }
 
         }
+
+
 
         var blocks = verticalDetail.selectAll('.j-bloque')
           .data(dataTable, function(d) {
@@ -736,7 +758,7 @@ angular.module('app')
 
               that.select('.j-nombre')
                 .text(function(d) {
-                  console.log(d," i: ",d.id);
+                 // console.log(d," i: ",d.id);
                   return dataModel.idsInfoTable[d.id].shortName + " ";
                 })
                 .transition()

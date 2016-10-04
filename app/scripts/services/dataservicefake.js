@@ -48,7 +48,7 @@ angular.module('dataServiceFAKE',[])
             "timeStamp": todayDate.toISOString()
           }
          */
-        $rootScope.$broadcast("dataService-received-energyData-event",jsonData);
+        $rootScope.$broadcast('dataService-received-energyData-event',jsonData);
       };
 
       setInterval(function(){
@@ -107,17 +107,16 @@ angular.module('dataServiceFAKE',[])
             obj.electricity= Math.random()*2000;
             obj.tv= Math.random()*300;
             obj.pv= Math.random()*1000;
-            obj.demand= obj.light+obj.electricity+obj.tv;
             obj.objective= Math.random()*100;
+            obj.demand= obj.light+obj.electricity+obj.tv;
 
             obj.timeStamp= todayDate.toISOString();
 
             jsonData.push(obj);
             obj={};
-            todayDate =  new Date(todayDate.getTime() - (10*60*1000))
+            todayDate =  new Date(todayDate.getTime() - (10*60*1000));
           }
 
-          console.log("sendJSON:", jsonData);
           broadcastEnergyData(jsonData);
 
         }).error(function(err){
