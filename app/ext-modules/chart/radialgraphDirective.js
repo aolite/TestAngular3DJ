@@ -83,20 +83,7 @@ angular.module('app')
 
         });
 
-        function selectRepresentativeVariables (idsInfoTable, jsonDataSpecificValue){
 
-          var result = [];
-
-          for (var elem in idsInfoTable) {
-
-            if (!idsInfoTable[elem].category.localeCompare('consumption')){
-              result.push(jsonDataSpecificValue[elem]);
-            }
-          }
-
-          return result;
-
-        }
 
         /****** Function graphGenerator *****/
 
@@ -726,6 +713,21 @@ angular.module('app')
 
     function grad2rad (grad){
       return Math.PI / 180 * grad;
+    }
+
+    function selectRepresentativeVariables (idsInfoTable, jsonDataSpecificValue){
+
+      var result = [];
+
+      for (var elem in idsInfoTable) {
+
+        if (!idsInfoTable[elem].category.localeCompare('consumption')){
+          result.push(jsonDataSpecificValue[elem]);
+        }
+      }
+
+      return result;
+
     }
 
   });
