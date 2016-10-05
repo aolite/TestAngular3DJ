@@ -4,7 +4,12 @@
  * @ngdoc directive
  * @name yeomanGeneratedProjectApp.directive:radialGraph
  * @description
- * # radialGraph
+ * # radialGraph: This graph has been adapted and generalised from Victor San Vicente visualizations.
+ * So please, for further re-use of this graph, make reference to the
+ * original author [San Vicente, 2016].
+ *
+ * [San Vicente, 2016]: San Vicente, Victor (2016). "Electric Generation in Spain- Latest 24h". Web Resource.
+ * http://energia.ningunaparte.net/en/
  */
 angular.module('app')
   .directive('radialGraph', function () {
@@ -71,7 +76,6 @@ angular.module('app')
 
 
         var jsonData=[];
-        var trans_mode = true;
         var myGraph = new RadialGraph(scope.idsInfoTable);
         myGraph.init(element);
 
